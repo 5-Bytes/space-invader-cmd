@@ -113,10 +113,7 @@ void move(char (*scene)[COLUMNS],int c, int *positionShip){
 
 void shoot(char (*scene)[COLUMNS], int *positionShip){
 		int i = ROWS-2;
-		while(i>= 0 && scene[i][(*positionShip)]==' ' || scene[i][(*positionShip)]=='@'){
+		do{
 			scene[i][(*positionShip)]='|';
-			--i;
-		}
+		}while(i-- > 0 && (scene[i][(*positionShip)]==' ' || scene[i][(*positionShip)]=='@'));
 }
-
-//ERROR EN LA FILA 2 COLUMNA 6
