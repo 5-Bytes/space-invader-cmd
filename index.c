@@ -16,9 +16,10 @@
 #define KEY_ESP 224
 
 void drawScene(char (*scene)[COLUMNS]);
-void showScene(char (*scene)[COLUMNS]);
-void move(char (*scene)[COLUMNS],int c, int *positionShip);
-void shoot(char (*scene)[COLUMNS], int *positionShip);
+void showScene(char (*scene)[COLUMNS],int score,int lives);
+void move(char (*scene)[COLUMNS],int c, int *positionShip,int *turn);
+void shoot(char (*scene)[COLUMNS], int positionShip, int *score);
+void updatePositionInvaders(char (*scene)[COLUMNS]);
 
 int main() {
 	int score = 0,
@@ -26,21 +27,26 @@ int main() {
 	char gameOver='n';
 	char scene[ROWS][COLUMNS];
 	int positionShip=13;
+	int turn = 0;
 
 	drawScene(scene);
 	
 	do{
-		showScene(scene);
+		showScene(scene, score, lives);
 		int c = getch();
 		if(c==KEY_ESP){
 			c = getch();
-			move(scene,c,&positionShip);
+			move(scene,c,&positionShip,&turn);
 		}
 		if(c==SPACE){
-			shoot(scene,&positionShip);
+			shoot(scene,positionShip, &score);
 		}
 		if(c==ESC){
 			gameOver='y';
+		}
+		if(turn == 6){
+			updatePositionInvaders(scene);
+			turn=0;
 		}
 		system("cls");
 	}while(gameOver=='n');
@@ -75,7 +81,7 @@ void drawScene(char (*scene)[COLUMNS]){
 	}
 }
 
-void showScene(char (*scene)[COLUMNS]){
+void showScene(char (*scene)[COLUMNS],int score,int lives){
 	struct timespec wait_time = {0,5000000};
 	for(int i=0; i<ROWS; i++){
 		for(int j=0;j<COLUMNS;j++){
@@ -90,9 +96,11 @@ void showScene(char (*scene)[COLUMNS]){
 		}
 		printf("\n");
 	}
+	printf("Score: %d \t Lives:%d",score,lives);
 }
 
-void move(char (*scene)[COLUMNS],int c, int *positionShip){
+void move(char (*scene)[COLUMNS],int c, int *positionShip,int *turn){
+	(*turn)++;
 	switch(c){
 			case(ARROW_LEFT):
 				if((*positionShip)>1){
@@ -111,9 +119,23 @@ void move(char (*scene)[COLUMNS],int c, int *positionShip){
 		}
 }
 
-void shoot(char (*scene)[COLUMNS], int *positionShip){
+void shoot(char (*scene)[COLUMNS], int positionShip, int *score){
 		int i = ROWS-2;
 		do{
-			scene[i][(*positionShip)]='|';
-		}while(i-- > 0 && (scene[i][(*positionShip)]==' ' || scene[i][(*positionShip)]=='@'));
+			if(scene[i][positionShip]=='@'){
+				(*score)+=10;
+			}
+			scene[i][positionShip]='|';
+		}while(i-- > 0 && (scene[i][positionShip]==' ' || scene[i][positionShip]=='@'));
+}
+
+void updatePositionInvaders(char (*scene)[COLUMNS]){
+	for (int i = ROWS-1;i>=0;i--){
+		for (int j = 0; j<COLUMNS; j++){
+			if(scene[i][j]=='@'){
+				scene[i][j]=' ';
+				scene[i+1][j]='@';
+			}
+		}
+	}
 }
